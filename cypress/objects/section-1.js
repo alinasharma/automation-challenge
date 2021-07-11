@@ -1,40 +1,65 @@
-const Section1 = {
-  /**
-   * A literal is considered static, stable strings (eg. titles, form labels, ...)
-   */
-  literals: {
-    SAMPLE_LITERAL: 'This is a sample literal. You can safely delete it.',
-  },
+//module.exports = { Section1 }
 
-  /**
-   * An element is a selector for any DOM element (eg. [data-test="xxx"], #id, ...)
-   */
-  elements: {
-    sampleElement: '[data-test=sample-element-to-be-safely-deleted]',
-  },
+export class Section1Page{
 
-  /**
-   * An action should be pretty self explanatory! It consists of all the method performing
-   * a particular action from clicking a simple button to doing complex assertions.
-   */
-  actions: {
-    /**
-     * Example of action.
-     * In this example, we are grabbing a sample element, clicking on it and asserting the api answer.
-     *
-     * This is only used as an example and can be safely deleted.
-     */
-    assertSampleApiResponse () {
-      cy.server()
-      cy.wait('/endpoint').as('endpoint')
+  clickOnShowTableButton(){
+    cy.get('button[id="table-toggle-button"]').click()
+  }
 
-      cy.get(Section1.elements.sampleElement).click()
-      // ... An api call to "/endpoint" performed on the app.
-      cy.wait('@endpoint').should((request) => {
-        expect(request.status).to.eq(200)
-      })
-    },
-  },
+  checkTableIsHidden(){
+    cy.get('[id=alaya-table]').then(($el) => {
+      Cypress.dom.isHidden($el) // false
+    })
+  }
+
+  checkTableVisibleIfTrue(){
+    cy.get('[id=alaya-table]') // jQuery element
+    .should('have.attr', 'style') // string attribute
+    .invoke('replace', /\s/g, '') // string without whitespace
+    .should('equal', 'display:table;')
+  }
+
+  clickOnShowFormButton(){
+    cy.get('button[id="form-toggle-button"]').click()
+  }
+
+  checkFormVisibleIfTrue(){
+    cy.get('[id=alaya-form]') // jQuery element
+    .should('have.attr', 'style') // string attribute
+    .invoke('replace', /\s/g, '') // string without whitespace
+    .should('equal', 'display:block;')
+  }
+
+  enterNameAndAgeInForm(){
+    this.clickOnShowFormButton()
+    cy.get('[id="fullName"]').type('testuser1')  
+    cy.get('#fullName').should('have.value', 'testuser1')
+    cy.get('[id="age"]').type('25') 
+    cy.get('#age').should('have.value', '25')
+  }
+
+  enterGenderInForm(){
+    this.clickOnShowFormButton()
+    cy.get('#gender').select('female')
+    cy.get('#gender').should('have.value', 'female')
+  }
+
+  enterNurseAsTrue(){
+    this.clickOnShowFormButton()
+    cy.get('#nurse')
+    .check({ force: true })
+    .should('be.checked')
+  }
+
+  clickOnSubmitButton(){
+    this.clickOnShowFormButton()
+    cy.on('window:alert', cy.stub().as('alert'))
+    cy.get('button[id="submit"]')
+    .should('be.enabled')
+    .click()
+  cy.get('@alert').should('have.been.calledWithExactly', 'Form submitted!')
+  }
 }
 
-module.exports = { Section1 }
+
+export const section1 = new Section1Page()
